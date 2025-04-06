@@ -1,5 +1,5 @@
 /**
- * A disk simulator
+ * A disk seeking simulation
  *
  * @file main.c
  * @author Joseph Leskey <josleskey@mail.mvnu.edu>
@@ -183,6 +183,7 @@ SeekList extractSeeks(FILE *stream)
 
 void process(SeekList seeks)
 {
+    // First come, first served algorithm
     firstComeFirstServed(&seeks);
     printStats(seeks);
 }
