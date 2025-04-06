@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <limits.h>
 
 #define D_SIZE_MIN 0
 #define D_SIZE_MAX 65535
@@ -237,6 +238,32 @@ void firstComeFirstServed(SeekList *seeks)
 
 void shortestSeekFirst(SeekList *seeks)
 {
+    int currentPosition = D_POS_CUR;
+
+    for (int i = 0; i < seeks->length; i++)
+    {
+        int bestIndex = -1;
+        int smallestDistance = INT_MAX;
+
+        for (int j = i + 1; j < seeks->length; i++)
+        {
+            int position = seeks->list[j];
+            int distance = abs(position - currentPosition);
+            if (distance < smallestDistance)
+            {
+                smallestDistance = distance;
+                bestIndex = j;
+                currentPosition = position;
+            }
+        }
+
+        if (bestIndex != -1)
+        {
+            int currentValue = seeks->list[i];
+            seeks->list[i] = seeks->list[bestIndex];
+            seeks->list[bestIndex] = currentValue;
+        }
+    }
 }
 
 void elevatorAlgorithm(SeekList *seeks)
