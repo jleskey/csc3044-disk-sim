@@ -196,7 +196,8 @@ void printStats(SeekList seeks)
     // Calculate distance and sum.
     for (int i = 0; i < seeks.length - 1; i++)
     {
-        distance += abs(seeks.list[i + 1] - seeks.list[i]);
+        int source = i == 0 ? D_POS_CUR : seeks.list[i];
+        distance += abs(seeks.list[i] - source);
         sum += seeks.list[i + 1];
     }
 
