@@ -185,7 +185,6 @@ SeekList extractSeeks(FILE *stream)
 void process(SeekList seeks)
 {
     // First come, first served algorithm
-    firstComeFirstServed(&seeks);
     printStats(seeks);
 }
 
@@ -226,14 +225,6 @@ void printStats(SeekList seeks)
         "Standard deviation: %.4f\n"
         "\n",
         distance, mean, stddev);
-}
-
-void firstComeFirstServed(SeekList *seeks)
-{
-    // We're assuming that the seeks are already in this order, so there
-    // is nothing to do here. However, for the sake of semantics, we'll
-    // assume that there could be.
-    return;
 }
 
 void shortestSeekFirst(SeekList *seeks)
