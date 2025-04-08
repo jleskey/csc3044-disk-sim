@@ -28,6 +28,8 @@ typedef struct SeekList
 bool streq(const char *a, const char *b);
 int randint(const int min, const int max);
 
+void printHeader(const char text[]);
+
 SeekList generateRandomSeeks(const int number);
 SeekList extractSeeks(FILE *stream);
 
@@ -35,7 +37,7 @@ void firstComeFirstServed(SeekList *seeks);
 void shortestSeekFirst(SeekList *seeks);
 void elevatorAlgorithm(SeekList *seeks);
 
-void printStats(SeekList seeks);
+void printStats(SeekList seeks, const char title[]);
 
 void process(SeekList seeks);
 
@@ -185,19 +187,21 @@ SeekList extractSeeks(FILE *stream)
 void process(SeekList seeks)
 {
     // First come, first served algorithm
-    printStats(seeks);
+    printStats(seeks, "First come, first served");
 
     // Shortest seek first algorithm
     shortestSeekFirst(&seeks);
-    printStats(seeks);
+    printStats(seeks, "Shortest seek first");
 
     // Elevator algorithm
     elevatorAlgorithm(&seeks);
-    printStats(seeks);
+    printStats(seeks, "Elevator algorithm");
 }
 
-void printStats(SeekList seeks)
+void printStats(SeekList seeks, const char title[])
 {
+    printHeader(title);
+
     int distance = 0;
     int sum = seeks.list[0];
 
@@ -305,6 +309,14 @@ void elevatorAlgorithm(SeekList *seeks)
 
         up = !up;
     }
+}
+
+void printHeader(const char text[]) {
+    printf("%s\n", text);
+    for (int i = 0; text[i] != '\0'; i++) {
+        printf("=");
+    }
+    printf("\n\n");
 }
 
 int randint(const int min, const int max)
