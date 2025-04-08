@@ -259,6 +259,44 @@ void shortestSeekFirst(SeekList *seeks)
 
 void elevatorAlgorithm(SeekList *seeks)
 {
+    int currentPosition = D_POS_CUR;
+
+    bool up = true;
+
+    for (int n = 0; n < 2; n++)
+    {
+        for (int i = 0; i < seeks->length; i++)
+        {
+            int bestIndex = -1;
+            int smallestDistance = INT_MAX;
+
+            for (int j = i + 1; j < seeks->length; j++)
+            {
+                int position = seeks->list[j];
+
+                if ((up && position >= currentPosition) ||
+                    (!up && position <= currentPosition))
+                {
+                    int distance = abs(position - currentPosition);
+                    if (distance < smallestDistance)
+                    {
+                        smallestDistance = distance;
+                        bestIndex = j;
+                        currentPosition = position;
+                    }
+                }
+            }
+
+            if (bestIndex != -1)
+            {
+                int currentValue = seeks->list[i];
+                seeks->list[i] = seeks->list[bestIndex];
+                seeks->list[bestIndex] = currentValue;
+            }
+        }
+
+        up = !up;
+    }
 }
 
 int randint(const int min, const int max)
