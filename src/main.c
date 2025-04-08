@@ -186,6 +186,14 @@ void process(SeekList seeks)
 {
     // First come, first served algorithm
     printStats(seeks);
+
+    // Shortest seek first algorithm
+    shortestSeekFirst(&seeks);
+    printStats(seeks);
+
+    // Elevator algorithm
+    elevatorAlgorithm(&seeks);
+    printStats(seeks);
 }
 
 void printStats(SeekList seeks)
