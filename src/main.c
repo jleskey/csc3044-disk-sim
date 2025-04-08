@@ -244,7 +244,7 @@ void shortestSeekFirst(SeekList *seeks)
         int bestIndex = -1;
         int smallestDistance = INT_MAX;
 
-        for (int j = i + 1; j < seeks->length; i++)
+        for (int j = i + 1; j < seeks->length; j++)
         {
             int position = seeks->list[j];
             int distance = abs(position - currentPosition);
