@@ -251,8 +251,9 @@ void shortestSeekFirst(SeekList *seeks)
     {
         int bestIndex = -1;
         int smallestDistance = INT_MAX;
+        int nextPosition;
 
-        for (int j = i + 1; j < seeks->length; j++)
+        for (int j = i; j < seeks->length; j++)
         {
             int position = seeks->list[j];
             int distance = abs(position - currentPosition);
@@ -260,15 +261,20 @@ void shortestSeekFirst(SeekList *seeks)
             {
                 smallestDistance = distance;
                 bestIndex = j;
-                currentPosition = position;
+                nextPosition = position;
             }
         }
 
         if (bestIndex != -1)
         {
-            int currentValue = seeks->list[i];
-            seeks->list[i] = seeks->list[bestIndex];
-            seeks->list[bestIndex] = currentValue;
+            if (bestIndex != i)
+            {
+                int currentValue = seeks->list[i];
+                seeks->list[i] = seeks->list[bestIndex];
+                seeks->list[bestIndex] = currentValue;
+            }
+
+            currentPosition = nextPosition;
         }
     }
 }
@@ -286,7 +292,7 @@ void elevatorAlgorithm(SeekList *seeks)
             int bestIndex = -1;
             int smallestDistance = INT_MAX;
 
-            for (int j = i + 1; j < seeks->length; j++)
+            for (int j = i; j < seeks->length; j++)
             {
                 int position = seeks->list[j];
 
