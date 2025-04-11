@@ -189,14 +189,17 @@ void process(SeekList seeks)
 {
     // First come, first served algorithm
     printStats(seeks, "First come, first served");
+    printIntList(seeks.list, seeks.length);
 
     // Shortest seek first algorithm
     shortestSeekFirst(&seeks);
     printStats(seeks, "Shortest seek first");
+    printIntList(seeks.list, seeks.length);
 
     // Elevator algorithm
     elevatorAlgorithm(&seeks);
     printStats(seeks, "Elevator algorithm");
+    printIntList(seeks.list, seeks.length);
 }
 
 void printStats(SeekList seeks, const char title[])
