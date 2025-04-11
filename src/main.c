@@ -312,9 +312,11 @@ void elevatorAlgorithm(SeekList *seeks)
     }
 }
 
-void printHeader(const char text[]) {
+void printHeader(const char text[])
+{
     printf("%s\n", text);
-    for (int i = 0; text[i] != '\0'; i++) {
+    for (int i = 0; text[i] != '\0'; i++)
+    {
         printf("=");
     }
     printf("\n\n");
