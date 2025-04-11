@@ -29,6 +29,7 @@ bool streq(const char *a, const char *b);
 int randint(const int min, const int max);
 
 void printHeader(const char text[]);
+void printIntList(const int list[], const int length);
 
 SeekList generateRandomSeeks(const int number);
 SeekList extractSeeks(FILE *stream);
@@ -317,6 +318,14 @@ void printHeader(const char text[]) {
         printf("=");
     }
     printf("\n\n");
+}
+
+void printIntList(const int list[], const int length)
+{
+    for (int i = 0; i < length; i++)
+    {
+        printf("%d%s", list[i], i + 1 == length ? "\n\n" : ", ");
+    }
 }
 
 int randint(const int min, const int max)
