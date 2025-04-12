@@ -34,7 +34,6 @@ void printIntList(const int list[], const int length);
 SeekList generateRandomSeeks(const int number);
 SeekList extractSeeks(FILE *stream);
 
-void firstComeFirstServed(SeekList *seeks);
 void shortestSeekFirst(SeekList *seeks);
 void elevatorAlgorithm(SeekList *seeks);
 
