@@ -138,7 +138,7 @@ SeekList generateRandomSeeks(const int number)
 
     srand(time(NULL));
 
-    if (seeks != NULL)
+    if (seeks)
     {
         for (int i = 0; i < number; i++)
             seeks[i] = randint(D_SIZE_MIN, D_SIZE_MAX);
@@ -153,19 +153,18 @@ SeekList generateRandomSeeks(const int number)
 
 SeekList extractSeeks(FILE *stream)
 {
-    int _seeks_size = D_DYNAMIC_BASE_SIZE;
-    int *seeks = malloc(sizeof(int) * _seeks_size);
-    int number = 0;
+    int size = D_DYNAMIC_BASE_SIZE;
+    int *seeks = malloc(sizeof(int) * size);
 
     int seek;
-    int i = 0;
+    int number = 0;
 
     while (fscanf(stream, "%d\n", &seek) == 1)
     {
-        if (i == number)
+        if (number == size)
         {
-            number *= 2;
-            int *_seeks = realloc(seeks, sizeof(int) * number);
+            size *= 2;
+            int *_seeks = realloc(seeks, sizeof(int) * size);
             if (_seeks)
             {
                 seeks = _seeks;
@@ -178,10 +177,10 @@ SeekList extractSeeks(FILE *stream)
             }
         }
 
-        seeks[i++] = seek;
+        seeks[number++] = seek;
     }
 
-    return (SeekList){seeks, i};
+    return (SeekList){seeks, number};
 }
 
 void process(SeekList seeks)
