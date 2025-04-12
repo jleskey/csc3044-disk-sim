@@ -19,6 +19,9 @@
 
 #define D_DYNAMIC_BASE_SIZE 10
 
+#define safe_malloc(size) _safe_malloc(size, __FILE__, __LINE__)
+#define safe_realloc(ptr, size) _safe_realloc(ptr, size, __FILE__, __LINE__)
+
 typedef struct SeekList
 {
     int *list;
@@ -27,6 +30,10 @@ typedef struct SeekList
 
 bool streq(const char *a, const char *b);
 int randint(const int min, const int max);
+
+void *_safe_malloc(const size_t size, const char *file, const int line);
+void *_safe_realloc(void *ptr, const size_t size, const char *file,
+                    const int line);
 
 void printHeader(const char text[]);
 void printIntList(const int list[], const int length);
@@ -134,19 +141,12 @@ bool streq(const char *a, const char *b)
 
 SeekList generateRandomSeeks(const int number)
 {
-    int *seeks = malloc(number * sizeof(int));
+    int *seeks = safe_malloc(number * sizeof(int));
 
     srand(time(NULL));
 
-    if (seeks)
-    {
-        for (int i = 0; i < number; i++)
-            seeks[i] = randint(D_SIZE_MIN, D_SIZE_MAX);
-    }
-    else
-    {
-        fprintf(stderr, "Allocation error @ generateRandomSeek::seeks\n");
-    }
+    for (int i = 0; i < number; i++)
+        seeks[i] = randint(D_SIZE_MIN, D_SIZE_MAX);
 
     return (SeekList){seeks, number};
 }
@@ -154,7 +154,7 @@ SeekList generateRandomSeeks(const int number)
 SeekList extractSeeks(FILE *stream)
 {
     int size = D_DYNAMIC_BASE_SIZE;
-    int *seeks = malloc(sizeof(int) * size);
+    int *seeks = safe_malloc(sizeof(int) * size);
 
     int seek;
     int number = 0;
@@ -164,17 +164,7 @@ SeekList extractSeeks(FILE *stream)
         if (number == size)
         {
             size *= 2;
-            int *_seeks = realloc(seeks, sizeof(int) * size);
-            if (_seeks)
-            {
-                seeks = _seeks;
-            }
-            else
-            {
-                free(seeks);
-                fprintf(stderr, "Allocation error @ extractSeeks::_seeks");
-                exit(EXIT_FAILURE);
-            }
+            seeks = safe_realloc(seeks, sizeof(int) * size);
         }
 
         seeks[number++] = seek;
@@ -343,4 +333,30 @@ int randint(const int min, const int max)
     // potentially non-uniform, but it's probably good enough for this
     // use case.
     return min + rand() % (max - min + 1);
+}
+
+void *_safe_malloc(const size_t size, const char *file, const int line)
+{
+    void *_ptr = malloc(size);
+    if (_ptr == NULL)
+    {
+        fprintf(stderr, "Allocation error @ %s:%d (%zu bytes)\n", file, line,
+                size);
+        exit(EXIT_FAILURE);
+    }
+    return _ptr;
+}
+
+void *_safe_realloc(void *ptr, const size_t size, const char *file,
+                    const int line)
+{
+    void *_ptr = realloc(ptr, size);
+    if (_ptr == NULL)
+    {
+        fprintf(stderr, "Allocation error @ %s:%d (%zu bytes)\n", file, line,
+                size);
+        free(ptr);
+        exit(EXIT_FAILURE);
+    }
+    return _ptr;
 }
