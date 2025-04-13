@@ -245,11 +245,12 @@ void printRunStats(SeekList seeks, const char title[])
     printHeader(title);
 
     int distance = 0;
+    int source = initialPosition;
 
-    for (int i = 0; i < seeks.length - 1; i++)
+    for (int i = 0; i < seeks.length; i++)
     {
-        int source = i == 0 ? initialPosition : seeks.list[i];
         distance += abs(seeks.list[i] - source);
+        source = seeks.list[i];
     }
 
     printf("Total distance: %d\n", distance);
