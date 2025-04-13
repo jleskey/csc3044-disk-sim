@@ -15,7 +15,7 @@
 
 #define D_SIZE_MIN 0
 #define D_SIZE_MAX 65535
-#define D_POS_CUR 32767
+#define D_POS_INIT 32767
 
 #define D_DYNAMIC_BASE_SIZE 10
 
@@ -47,6 +47,8 @@ void elevatorAlgorithm(SeekList *seeks);
 void printStats(SeekList seeks, const char title[]);
 
 void process(SeekList seeks);
+
+int initialPosition = D_POS_INIT;
 
 int main(int argc, char *argv[])
 {
@@ -175,6 +177,13 @@ SeekList extractSeeks(FILE *stream)
 
 void process(SeekList seeks)
 {
+    // Starting position
+    const char *initialPositionInput = getenv("D_POS_INIT");
+    if (initialPositionInput != NULL) {
+        initialPosition = atoi(initialPositionInput);
+    }
+    printf("Initial position: %d\n\n", initialPosition);
+
     // First come, first served algorithm
     printStats(seeks, "First come, first served");
     printIntList(seeks.list, seeks.length);
@@ -200,7 +209,7 @@ void printStats(SeekList seeks, const char title[])
     // Calculate distance and sum.
     for (int i = 0; i < seeks.length - 1; i++)
     {
-        int source = i == 0 ? D_POS_CUR : seeks.list[i];
+        int source = i == 0 ? initialPosition : seeks.list[i];
         distance += abs(seeks.list[i] - source);
         sum += seeks.list[i + 1];
     }
@@ -233,7 +242,7 @@ void printStats(SeekList seeks, const char title[])
 
 void shortestSeekFirst(SeekList *seeks)
 {
-    int currentPosition = D_POS_CUR;
+    int currentPosition = initialPosition;
 
     for (int i = 0; i < seeks->length; i++)
     {
@@ -269,7 +278,7 @@ void shortestSeekFirst(SeekList *seeks)
 
 void elevatorAlgorithm(SeekList *seeks)
 {
-    int currentPosition = D_POS_CUR;
+    int currentPosition = initialPosition;
 
     bool up = true;
 
