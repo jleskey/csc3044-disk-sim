@@ -44,7 +44,8 @@ SeekList extractSeeks(FILE *stream);
 void shortestSeekFirst(SeekList *seeks);
 void elevatorAlgorithm(SeekList *seeks);
 
-void printStats(SeekList seeks, const char title[]);
+void printOverview(SeekList seeks);
+void printRunStats(SeekList seeks, const char title[]);
 
 void process(SeekList seeks);
 
@@ -179,39 +180,38 @@ void process(SeekList seeks)
 {
     // Starting position
     const char *initialPositionInput = getenv("D_POS_INIT");
-    if (initialPositionInput != NULL) {
+    if (initialPositionInput != NULL)
+    {
         initialPosition = atoi(initialPositionInput);
     }
-    printf("Initial position: %d\n\n", initialPosition);
+
+    // Overview
+    printOverview(seeks);
 
     // First come, first served algorithm
-    printStats(seeks, "First come, first served");
-    printIntList(seeks.list, seeks.length);
+    printRunStats(seeks, "First come, first served");
 
     // Shortest seek first algorithm
     shortestSeekFirst(&seeks);
-    printStats(seeks, "Shortest seek first");
-    printIntList(seeks.list, seeks.length);
+    printRunStats(seeks, "Shortest seek first");
 
     // Elevator algorithm
     elevatorAlgorithm(&seeks);
-    printStats(seeks, "Elevator algorithm");
-    printIntList(seeks.list, seeks.length);
+    printRunStats(seeks, "Elevator algorithm");
+
+    // Comfortable padding
+    printf("\n");
 }
 
-void printStats(SeekList seeks, const char title[])
+void printOverview(SeekList seeks)
 {
-    printHeader(title);
+    printHeader("Overview");
 
-    int distance = 0;
-    int sum = seeks.list[0];
+    int sum = 0;
 
-    // Calculate distance and sum.
-    for (int i = 0; i < seeks.length - 1; i++)
+    for (int i = 0; i < seeks.length; i++)
     {
-        int source = i == 0 ? initialPosition : seeks.list[i];
-        distance += abs(seeks.list[i] - source);
-        sum += seeks.list[i + 1];
+        sum += seeks.list[i];
     }
 
     // Calculate mean.
@@ -233,11 +233,28 @@ void printStats(SeekList seeks, const char title[])
 
     // Drop the stats.
     printf(
-        "Distance: %d\n"
+        "Initial position: %d\n"
+        "Total seeks: %d\n"
         "Mean: %.4f\n"
-        "Standard deviation: %.4f\n"
-        "\n",
-        distance, mean, stddev);
+        "Standard deviation: %.4f\n",
+        initialPosition, seeks.length, mean, stddev);
+}
+
+void printRunStats(SeekList seeks, const char title[])
+{
+    printHeader(title);
+
+    int distance = 0;
+
+    for (int i = 0; i < seeks.length - 1; i++)
+    {
+        int source = i == 0 ? initialPosition : seeks.list[i];
+        distance += abs(seeks.list[i] - source);
+    }
+
+    printf("Total distance: %d\n", distance);
+    printf("\n");
+    printIntList(seeks.list, seeks.length);
 }
 
 void shortestSeekFirst(SeekList *seeks)
@@ -320,7 +337,7 @@ void elevatorAlgorithm(SeekList *seeks)
 
 void printHeader(const char text[])
 {
-    printf("%s\n", text);
+    printf("\n%s\n", text);
     for (int i = 0; text[i] != '\0'; i++)
     {
         printf("=");
@@ -332,7 +349,7 @@ void printIntList(const int list[], const int length)
 {
     for (int i = 0; i < length; i++)
     {
-        printf("%d%s", list[i], i + 1 == length ? "\n\n" : ", ");
+        printf("%d%s", list[i], i + 1 == length ? "\n" : ", ");
     }
 }
 
