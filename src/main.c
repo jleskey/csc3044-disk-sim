@@ -296,43 +296,47 @@ void shortestSeekFirst(SeekList *seeks)
 
 void elevatorAlgorithm(SeekList *seeks)
 {
-    int currentPosition = initialPosition;
-
     bool up = true;
 
-    for (int n = 0; n < 2; n++)
+    int seekPosition = initialPosition;
+    int index = 0;
+
+    for (int run = 2; run > 0; run--, up = !up)
     {
-        for (int i = 0; i < seeks->length; i++)
+        for (; index < seeks->length; index++)
         {
-            int bestIndex = -1;
-            int smallestDistance = INT_MAX;
+            int position = seeks->list[index];
+            int nextIndex = index;
 
-            for (int j = i; j < seeks->length; j++)
+            int lower = up ? seekPosition : INT_MIN;
+            int upper = up ? INT_MAX : seekPosition;
+
+            for (int evalIndex = index; evalIndex < seeks->length; evalIndex++)
             {
-                int position = seeks->list[j];
+                int evalPosition = seeks->list[evalIndex];
 
-                if ((up && position >= currentPosition) ||
-                    (!up && position <= currentPosition))
+                if (lower < evalPosition && evalPosition < upper)
                 {
-                    int distance = abs(position - currentPosition);
-                    if (distance < smallestDistance)
+                    seekPosition = evalPosition;
+                    nextIndex = evalIndex;
+
+                    if (up)
                     {
-                        smallestDistance = distance;
-                        bestIndex = j;
-                        currentPosition = position;
+                        upper = seekPosition;
+                    }
+                    else
+                    {
+                        lower = seekPosition;
                     }
                 }
             }
 
-            if (bestIndex != -1)
+            if (nextIndex != index)
             {
-                int currentValue = seeks->list[i];
-                seeks->list[i] = seeks->list[bestIndex];
-                seeks->list[bestIndex] = currentValue;
+                seeks->list[index] = seekPosition;
+                seeks->list[nextIndex] = position;
             }
         }
-
-        up = !up;
     }
 }
 
