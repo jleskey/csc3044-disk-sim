@@ -305,11 +305,11 @@ void elevatorAlgorithm(SeekList *seeks)
     {
         for (; index < seeks->length; index++)
         {
-            int position = seeks->list[index];
-            int nextIndex = index;
-
             int lower = up ? seekPosition : INT_MIN;
             int upper = up ? INT_MAX : seekPosition;
+
+            int position = seeks->list[index];
+            int nextIndex = index;
 
             for (int evalIndex = index; evalIndex < seeks->length; evalIndex++)
             {
