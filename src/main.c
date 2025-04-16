@@ -170,7 +170,14 @@ SeekList extractSeeks(FILE *stream)
             seeks = safe_realloc(seeks, sizeof(int) * size);
         }
 
-        seeks[number++] = seek;
+        if (D_SIZE_MIN <= seek && seek <= D_SIZE_MAX)
+        {
+            seeks[number++] = seek;
+        }
+        else
+        {
+            fprintf(stderr, "\nSeek out of bounds: %d\n\n", seek);
+        }
     }
 
     return (SeekList){seeks, number};
@@ -207,11 +214,20 @@ void printOverview(SeekList seeks)
 {
     printHeader("Overview");
 
+    int realSeeks = seeks.length;
     int sum = 0;
 
+    // Calculate sum and actual seek count.
     for (int i = 0; i < seeks.length; i++)
     {
         sum += seeks.list[i];
+
+        // There's not much to seek if we're already where we want to
+        // be.
+        if (i != 0 && seeks.list[i] == seeks.list[i - 1])
+        {
+            realSeeks--;
+        }
     }
 
     // Calculate mean.
@@ -234,10 +250,11 @@ void printOverview(SeekList seeks)
     // Drop the stats.
     printf(
         "Initial position: %d\n"
-        "Total seeks: %d\n"
+        "Total requested seeks: %d\n"
+        "Total effective seeks: %d\n"
         "Mean: %.4f\n"
         "Standard deviation: %.4f\n",
-        initialPosition, seeks.length, mean, stddev);
+        initialPosition, seeks.length, realSeeks, mean, stddev);
 }
 
 void printRunStats(SeekList seeks, const char title[])
