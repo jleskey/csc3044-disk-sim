@@ -16,6 +16,7 @@
 #define D_SIZE_MIN 0
 #define D_SIZE_MAX 65535
 #define D_POS_INIT 32767
+#define CHUNK true
 
 #define D_DYNAMIC_BASE_SIZE 10
 
@@ -29,6 +30,7 @@ typedef struct SeekList
 } SeekList;
 
 bool streq(const char *a, const char *b);
+int min(const int a, const int b);
 int randint(const int min, const int max);
 
 void *_safe_malloc(const size_t size, const char *file, const int line);
@@ -41,15 +43,20 @@ void printIntList(const int list[], const int length);
 SeekList generateRandomSeeks(const int number);
 SeekList extractSeeks(FILE *stream);
 
+void firstComeFirstServed(SeekList *seeks);
 void shortestSeekFirst(SeekList *seeks);
 void elevatorAlgorithm(SeekList *seeks);
 
 void printOverview(SeekList seeks);
 void printRunStats(SeekList seeks, const char title[]);
 
+void processChunk(SeekList chunk);
 void process(SeekList seeks);
 
-int initialPosition = D_POS_INIT;
+int currentStart = -1;
+int firstComeStart = D_POS_INIT;
+int shortestStart = D_POS_INIT;
+int elevatorStart = D_POS_INIT;
 
 int main(int argc, char *argv[])
 {
@@ -121,7 +128,11 @@ int main(int argc, char *argv[])
 
         if (seeks.list != NULL)
         {
+#if CHUNK == true
             process(seeks);
+#else
+            processChunk(seeks);
+#endif
             free(seeks.list);
         }
         else
@@ -189,13 +200,58 @@ void process(SeekList seeks)
     const char *initialPositionInput = getenv("D_POS_INIT");
     if (initialPositionInput != NULL)
     {
-        initialPosition = atoi(initialPositionInput);
+        int start = atoi(initialPositionInput);
+        firstComeStart = start;
+        shortestStart = start;
+        elevatorStart = start;
     }
 
+    // I worked out my basic structure before the instructions were
+    // updated. I was planning to just process all the requests in one
+    // go. Hopefully this addition emulates the sort of table required.
+    int buffer[100];
+    int remaining = seeks.length;
+    int seekIndex = 0;
+
+    for (; seekIndex < min(100, remaining); seekIndex++)
+    {
+        buffer[seekIndex] = seeks.list[seekIndex];
+    }
+
+    while (remaining)
+    {
+        // Select the next chunk.
+        int chunkSize = min(20, remaining);
+        SeekList chunk = {buffer, chunkSize};
+
+        // Process chunk.
+        processChunk(chunk);
+
+        // Shift buffer content.
+        int shiftIndex = chunkSize;
+        for (; shiftIndex < 100 && shiftIndex < remaining; shiftIndex++)
+        {
+            buffer[shiftIndex - chunkSize] = buffer[shiftIndex];
+        }
+
+        // Update remaining integer count.
+        remaining -= chunkSize;
+
+        // Refill buffer.
+        for (int i = shiftIndex - chunkSize; i < 100 && i < remaining; i++)
+        {
+            buffer[i] = seeks.list[seekIndex++];
+        }
+    }
+}
+
+void processChunk(SeekList seeks)
+{
     // Overview
     printOverview(seeks);
 
     // First come, first served algorithm
+    firstComeFirstServed(&seeks);
     printRunStats(seeks, "First come, first served");
 
     // Shortest seek first algorithm
@@ -249,12 +305,11 @@ void printOverview(SeekList seeks)
 
     // Drop the stats.
     printf(
-        "Initial position: %d\n"
         "Total requested seeks: %d\n"
         "Total effective seeks: %d\n"
         "Mean: %.4f\n"
         "Standard deviation: %.4f\n",
-        initialPosition, seeks.length, realSeeks, mean, stddev);
+        seeks.length, realSeeks, mean, stddev);
 }
 
 void printRunStats(SeekList seeks, const char title[])
@@ -262,22 +317,31 @@ void printRunStats(SeekList seeks, const char title[])
     printHeader(title);
 
     int distance = 0;
-    int source = initialPosition;
+    int seekPosition = currentStart;
 
     for (int i = 0; i < seeks.length; i++)
     {
-        distance += abs(seeks.list[i] - source);
-        source = seeks.list[i];
+        distance += abs(seeks.list[i] - seekPosition);
+        seekPosition = seeks.list[i];
     }
 
+    printf("Starting position: %d\n", currentStart);
     printf("Total distance: %d\n", distance);
     printf("\n");
     printIntList(seeks.list, seeks.length);
 }
 
+void firstComeFirstServed(SeekList *seeks)
+{
+    currentStart = firstComeStart;
+    firstComeStart = seeks->list[seeks->length - 1];
+}
+
 void shortestSeekFirst(SeekList *seeks)
 {
-    int currentPosition = initialPosition;
+    currentStart = shortestStart;
+
+    int seekPosition = shortestStart;
 
     for (int i = 0; i < seeks->length; i++)
     {
@@ -288,7 +352,7 @@ void shortestSeekFirst(SeekList *seeks)
         for (int j = i; j < seeks->length; j++)
         {
             int position = seeks->list[j];
-            int distance = abs(position - currentPosition);
+            int distance = abs(position - seekPosition);
             if (distance < smallestDistance)
             {
                 smallestDistance = distance;
@@ -306,16 +370,20 @@ void shortestSeekFirst(SeekList *seeks)
                 seeks->list[bestIndex] = currentValue;
             }
 
-            currentPosition = nextPosition;
+            seekPosition = nextPosition;
         }
     }
+
+    shortestStart = seekPosition;
 }
 
 void elevatorAlgorithm(SeekList *seeks)
 {
     bool up = true;
 
-    int seekPosition = initialPosition;
+    currentStart = elevatorStart;
+
+    int seekPosition = elevatorStart;
     int index = 0;
 
     for (int run = 2; run > 0; run--, up = !up)
@@ -355,6 +423,8 @@ void elevatorAlgorithm(SeekList *seeks)
             }
         }
     }
+
+    elevatorStart = seeks->list[seeks->length - 1];
 }
 
 void printHeader(const char text[])
@@ -381,6 +451,11 @@ int randint(const int min, const int max)
     // potentially non-uniform, but it's probably good enough for this
     // use case.
     return min + rand() % (max - min + 1);
+}
+
+int min(const int a, const int b)
+{
+    return a < b ? a : b;
 }
 
 void *_safe_malloc(const size_t size, const char *file, const int line)
