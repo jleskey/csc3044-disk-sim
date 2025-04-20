@@ -282,7 +282,7 @@ void printOverview(SeekList seeks)
 {
     printHeader("Overview");
 
-    int sum = 0;
+    long sum = 0;
 
     // Calculate sum.
     for (int i = 0; i < seeks.length; i++)
