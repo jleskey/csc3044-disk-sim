@@ -199,7 +199,6 @@ void process(SeekList seeks)
 {
     // Starting position
     const char *initialPositionInput = getenv("D_POS_INIT");
-    printf("%s\n\n", initialPositionInput);
     if (initialPositionInput != NULL)
     {
         int start = atoi(initialPositionInput);
