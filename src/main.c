@@ -282,10 +282,16 @@ void printOverview(SeekList seeks)
 
     int sum = 0;
 
+    // Calculate sum.
+    for (int i = 0; i < seeks.length; i++)
+    {
+        sum += seeks.list[i];
+    }
+
     // Calculate mean.
     double mean = sum / (double)seeks.length;
 
-    int sumOfDeviations = 0;
+    double sumOfDeviations = 0;
 
     // Calculate sum of deviations.
     for (int i = 0; i < seeks.length; i++)
