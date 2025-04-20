@@ -49,14 +49,19 @@ void elevatorAlgorithm(SeekList *seeks);
 
 void printOverview(SeekList seeks);
 void printRunStats(SeekList seeks, const char title[]);
+void printConclusion();
 
 void processChunk(SeekList chunk);
+void processInChunks(SeekList seeks);
 void process(SeekList seeks);
 
 int currentStart = -1;
 int firstComeStart = D_POS_INIT;
+int firstComeTally = 0;
 int shortestStart = D_POS_INIT;
+int shortestTally = 0;
 int elevatorStart = D_POS_INIT;
+int elevatorTally = 0;
 
 int main(int argc, char *argv[])
 {
@@ -128,11 +133,7 @@ int main(int argc, char *argv[])
 
         if (seeks.list != NULL)
         {
-#if CHUNK == true
             process(seeks);
-#else
-            processChunk(seeks);
-#endif
             free(seeks.list);
         }
         else
@@ -195,6 +196,17 @@ SeekList extractSeeks(FILE *stream)
 }
 
 void process(SeekList seeks)
+{
+#if CHUNK == true
+    processInChunks(seeks);
+#else
+    processChunk(seeks);
+#endif
+
+    printConclusion();
+}
+
+void processInChunks(SeekList seeks)
 {
     // Starting position
     const char *initialPositionInput = getenv("D_POS_INIT");
@@ -261,30 +273,13 @@ void processChunk(SeekList seeks)
     // Elevator algorithm
     elevatorAlgorithm(&seeks);
     printRunStats(seeks, "Elevator algorithm");
-
-    // Comfortable padding
-    printf("\n");
 }
 
 void printOverview(SeekList seeks)
 {
     printHeader("Overview");
 
-    int realSeeks = seeks.length;
     int sum = 0;
-
-    // Calculate sum and actual seek count.
-    for (int i = 0; i < seeks.length; i++)
-    {
-        sum += seeks.list[i];
-
-        // There's not much to seek if we're already where we want to
-        // be.
-        if (i != 0 && seeks.list[i] == seeks.list[i - 1])
-        {
-            realSeeks--;
-        }
-    }
 
     // Calculate mean.
     double mean = sum / (double)seeks.length;
@@ -306,10 +301,9 @@ void printOverview(SeekList seeks)
     // Drop the stats.
     printf(
         "Total requested seeks: %d\n"
-        "Total effective seeks: %d\n"
         "Mean: %.4f\n"
         "Standard deviation: %.4f\n",
-        seeks.length, realSeeks, mean, stddev);
+        seeks.length, mean, stddev);
 }
 
 void printRunStats(SeekList seeks, const char title[])
@@ -331,10 +325,31 @@ void printRunStats(SeekList seeks, const char title[])
     printIntList(seeks.list, seeks.length);
 }
 
+void printConclusion()
+{
+    printHeader("Effective seek counts");
+    printf(
+        "First come, first served: %d\n"
+        "Shortest seek first: %d\n"
+        "Elevator algorithm: %d\n"
+        "\n",
+        firstComeTally, shortestTally, elevatorTally);
+}
+
 void firstComeFirstServed(SeekList *seeks)
 {
     currentStart = firstComeStart;
-    firstComeStart = seeks->list[seeks->length - 1];
+
+    int lastPosition = firstComeStart;
+
+    for (int i = 0; i < seeks->length; i++) {
+        if (seeks->list[i] != lastPosition) {
+            firstComeTally++;
+        }
+        lastPosition = seeks->list[i];
+    }
+
+    firstComeStart = lastPosition;
 }
 
 void shortestSeekFirst(SeekList *seeks)
@@ -370,7 +385,10 @@ void shortestSeekFirst(SeekList *seeks)
                 seeks->list[bestIndex] = currentValue;
             }
 
-            seekPosition = nextPosition;
+            if (seekPosition != nextPosition) {
+                seekPosition = nextPosition;
+                shortestTally++;
+            }
         }
     }
 
@@ -424,7 +442,16 @@ void elevatorAlgorithm(SeekList *seeks)
         }
     }
 
-    elevatorStart = seeks->list[seeks->length - 1];
+    seekPosition = elevatorStart;
+
+    for (int i = 0; i < seeks->length; i++) {
+        if (seeks->list[i] != seekPosition) {
+            elevatorTally++;
+        }
+        seekPosition = seeks->list[i];
+    }
+
+    elevatorStart = seekPosition;
 }
 
 void printHeader(const char text[])
