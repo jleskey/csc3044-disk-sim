@@ -197,6 +197,17 @@ SeekList extractSeeks(FILE *stream)
 
 void process(SeekList seeks)
 {
+    // Starting position
+    const char *initialPositionInput = getenv("D_POS_INIT");
+    printf("%s\n\n", initialPositionInput);
+    if (initialPositionInput != NULL)
+    {
+        int start = atoi(initialPositionInput);
+        firstComeStart = start;
+        shortestStart = start;
+        elevatorStart = start;
+    }
+
 #if CHUNK == true
     processInChunks(seeks);
 #else
@@ -208,16 +219,6 @@ void process(SeekList seeks)
 
 void processInChunks(SeekList seeks)
 {
-    // Starting position
-    const char *initialPositionInput = getenv("D_POS_INIT");
-    if (initialPositionInput != NULL)
-    {
-        int start = atoi(initialPositionInput);
-        firstComeStart = start;
-        shortestStart = start;
-        elevatorStart = start;
-    }
-
     // I worked out my basic structure before the instructions were
     // updated. I was planning to just process all the requests in one
     // go. Hopefully this addition emulates the sort of table required.
@@ -342,8 +343,10 @@ void firstComeFirstServed(SeekList *seeks)
 
     int lastPosition = firstComeStart;
 
-    for (int i = 0; i < seeks->length; i++) {
-        if (seeks->list[i] != lastPosition) {
+    for (int i = 0; i < seeks->length; i++)
+    {
+        if (seeks->list[i] != lastPosition)
+        {
             firstComeTally++;
         }
         lastPosition = seeks->list[i];
@@ -385,7 +388,8 @@ void shortestSeekFirst(SeekList *seeks)
                 seeks->list[bestIndex] = currentValue;
             }
 
-            if (seekPosition != nextPosition) {
+            if (seekPosition != nextPosition)
+            {
                 seekPosition = nextPosition;
                 shortestTally++;
             }
@@ -444,8 +448,10 @@ void elevatorAlgorithm(SeekList *seeks)
 
     seekPosition = elevatorStart;
 
-    for (int i = 0; i < seeks->length; i++) {
-        if (seeks->list[i] != seekPosition) {
+    for (int i = 0; i < seeks->length; i++)
+    {
+        if (seeks->list[i] != seekPosition)
+        {
             elevatorTally++;
         }
         seekPosition = seeks->list[i];
