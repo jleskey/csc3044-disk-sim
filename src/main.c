@@ -47,7 +47,7 @@ void firstComeFirstServed(SeekList *seeks);
 void shortestSeekFirst(SeekList *seeks);
 void elevatorAlgorithm(SeekList *seeks);
 
-void printOverview(SeekList seeks);
+void printOverview(SeekList seeks, bool final);
 void printRunStats(SeekList seeks, const char title[]);
 void printConclusion();
 
@@ -213,14 +213,11 @@ void process(SeekList seeks)
     processChunk(seeks);
 #endif
 
-    printConclusion();
+    printOverview(seeks, true);
 }
 
 void processInChunks(SeekList seeks)
 {
-    // Overview
-    printOverview(seeks);
-
     // I worked out my basic structure before the instructions were
     // updated. I was planning to just process all the requests in one
     // go. Hopefully this addition emulates the sort of table required.
@@ -263,7 +260,7 @@ void processInChunks(SeekList seeks)
 void processChunk(SeekList seeks)
 {
     // Overview
-    printOverview(seeks);
+    printOverview(seeks, false);
 
     // First come, first served algorithm
     firstComeFirstServed(&seeks);
@@ -278,9 +275,9 @@ void processChunk(SeekList seeks)
     printRunStats(seeks, "Elevator algorithm");
 }
 
-void printOverview(SeekList seeks)
+void printOverview(SeekList seeks, bool final)
 {
-    printHeader("Overview");
+    printHeader(final ? "Conclusion" : "Overview");
 
     long sum = 0;
 
@@ -313,6 +310,10 @@ void printOverview(SeekList seeks)
         "Mean: %.4f\n"
         "Standard deviation: %.4f\n",
         seeks.length, mean, stddev);
+
+    if (final) {
+        printConclusion();
+    }
 }
 
 void printRunStats(SeekList seeks, const char title[])
