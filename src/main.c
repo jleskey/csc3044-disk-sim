@@ -218,6 +218,9 @@ void process(SeekList seeks)
 
 void processInChunks(SeekList seeks)
 {
+    // Overview
+    printOverview(seeks);
+
     // I worked out my basic structure before the instructions were
     // updated. I was planning to just process all the requests in one
     // go. Hopefully this addition emulates the sort of table required.
