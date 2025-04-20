@@ -3,3 +3,6 @@
 
 # Binaries
 out/
+
+# File locks
+.~lock.*
